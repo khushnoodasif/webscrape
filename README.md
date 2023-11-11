@@ -1,5 +1,3 @@
-# Python Scripts README
-
 ## Overview
 This repository contains two Python scripts: `scrape.py` and `surah_rename.py`, each serving a specific purpose.
 
