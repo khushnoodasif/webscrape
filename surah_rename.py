@@ -1,5 +1,6 @@
 import os
 import re
+import eyed3
 
 surahs = [
     "001-al-fatiha-(the-opening)",
@@ -118,20 +119,25 @@ surahs = [
     "114-an-nas-(mankind)"
 ]
 
-def rename_files_in_directories(*directories):
-    for directory in directories:
-        for filename in os.listdir(directory):
-            original_path = os.path.join(directory, filename)
+def rename_files_in_directory(directory, new_names):
+    mp3_files = [file for file in os.listdir(directory) if file.endswith(".mp3")]
 
-            match = re.search(r'^[^-]+-[^-]+-[^-]+-([^-.]+)', filename)
-            if match:
-                new_filename = f"{match.group(1)}.mp3"
-                new_path = os.path.join(directory, new_filename)
+    if len(mp3_files) != len(new_names):
+        print("Error: Number of files and names in the list do not match.")
+    else:
+        for i, mp3_file in enumerate(mp3_files):
+            # Get the full path of the MP3 file
+            mp3_path = os.path.join(directory, mp3_file)
 
-                os.rename(original_path, new_path)
-                print(f"Renamed: {original_path} to {new_path}")
-            else:
-                print(f"File does not match the expected pattern: {original_path}")
+            # Load the MP3 file
+            audiofile = eyed3.load(mp3_path)
+
+            # Set the new name as the title in the ID3 tags
+            audiofile.tag.title = new_names[i]
+
+            # Save the changes
+            audiofile.tag.save()
+            print(f"Updated metadata for '{mp3_file}' to '{new_names[i]}'")
 
 def rename_files_to_surah_names(directory, surahs_list):
     for filename in os.listdir(directory):
@@ -151,10 +157,9 @@ def rename_files_to_surah_names(directory, surahs_list):
         else:
             print(f"File does not match the expected pattern: {original_path}")
 
-download_dir = "/home/aio-pc/Desktop/"
+download_dir = "/Downloads"
 translation_dir = os.path.join(download_dir, "Translations")
 arabic_dir = os.path.join(download_dir, "Arabic")
 
-rename_files_in_directories(translation_dir, arabic_dir)
-rename_files_to_surah_names(translation_dir, surahs)
-rename_files_to_surah_names(arabic_dir, surahs)
+rename_files_in_directory(translation_dir, surahs)
+rename_files_in_directory(arabic_dir, surahs)
